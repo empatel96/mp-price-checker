@@ -110,88 +110,92 @@
 
           // Send the request to MyProtein API
           axios
-            .post('http://localhost:3000/proxy', requestBody, { headers })
+            .get(
+              'https://ycm8zcsfi7.execute-api.eu-west-2.amazonaws.com/get-mp-price?sku=' +
+                sku,
+              // requestBody,
+              { headers }
+            )
             .then((response) => {
-              const data = response.data;
-              const variants = data.data.product.variants;
+              const data = response.data.data;
 
-              let productsWithPricePerKg = [];
+              // let productsWithPricePerKg = [];
 
-              // Loop through each variant to calculate price per kg and store the data
-              variants.forEach((variant) => {
-                const title = variant.title;
-                const priceAmount = parseFloat(variant.price.price.amount);
-                const weightMatch = variant.choices.find(
-                  (choice) => choice.optionKey === 'Amount'
-                );
+              // // Loop through each variant to calculate price per kg and store the data
+              // variants.forEach((variant) => {
+              //   const title = variant.title;
+              //   const priceAmount = parseFloat(variant.price.price.amount);
+              //   const weightMatch = variant.choices.find(
+              //     (choice) => choice.optionKey === 'Amount'
+              //   );
 
-                let weight = 0;
-                let pricePerServing = 0;
+              //   let weight = 0;
+              //   let pricePerServing = 0;
 
-                // If the Amount is in servings, calculate cost per serving
-                if (weightMatch) {
-                  const amountKey = weightMatch.key.toLowerCase();
+              //   // If the Amount is in servings, calculate cost per serving
+              //   if (weightMatch) {
+              //     const amountKey = weightMatch.key.toLowerCase();
 
-                  if (
-                    amountKey.includes('servings') ||
-                    amountKey.includes('tablets')
-                  ) {
-                    const servings = parseInt(amountKey.replace(/\D/g, ''), 10);
-                    pricePerServing = priceAmount / servings;
-                    productsWithPricePerKg.push({
-                      title: title,
-                      total: priceAmount,
-                      servings: servings,
-                      sku: variant.sku,
-                      pricePerServing: pricePerServing.toFixed(2),
-                      inStock: variant.inStock ? 'Yes' : 'No',
-                      pricePerKg: null,
-                    });
-                  } else if (
-                    amountKey.includes('kg') ||
-                    amountKey.includes('g')
-                  ) {
-                    weight = parseFloat(amountKey.replace(/[^\d\.]/g, '')) || 0;
-                    if (!amountKey.includes('kg')) weight = weight / 1000; // Convert grams to kg
-                  }
-                }
+              //     if (
+              //       amountKey.includes('servings') ||
+              //       amountKey.includes('tablets')
+              //     ) {
+              //       const servings = parseInt(amountKey.replace(/\D/g, ''), 10);
+              //       pricePerServing = priceAmount / servings;
+              //       productsWithPricePerKg.push({
+              //         title: title,
+              //         total: priceAmount,
+              //         servings: servings,
+              //         sku: variant.sku,
+              //         pricePerServing: pricePerServing.toFixed(2),
+              //         inStock: variant.inStock ? 'Yes' : 'No',
+              //         pricePerKg: null,
+              //       });
+              //     } else if (
+              //       amountKey.includes('kg') ||
+              //       amountKey.includes('g')
+              //     ) {
+              //       weight = parseFloat(amountKey.replace(/[^\d\.]/g, '')) || 0;
+              //       if (!amountKey.includes('kg')) weight = weight / 1000; // Convert grams to kg
+              //     }
+              //   }
 
-                // Calculate price per kg for weight-based variants
-                if (weight > 0) {
-                  const pricePerKg = priceAmount / weight;
-                  productsWithPricePerKg.push({
-                    title: title,
-                    total: priceAmount,
-                    weight: weight,
-                    sku: variant.sku,
-                    pricePerKg: pricePerKg.toFixed(2),
-                    inStock: variant.inStock ? 'Yes' : 'No',
-                    pricePerServing: null,
-                  });
-                }
-              });
+              //   // Calculate price per kg for weight-based variants
+              //   if (weight > 0) {
+              //     const pricePerKg = priceAmount / weight;
+              //     productsWithPricePerKg.push({
+              //       title: title,
+              //       total: priceAmount,
+              //       weight: weight,
+              //       sku: variant.sku,
+              //       pricePerKg: pricePerKg.toFixed(2),
+              //       inStock: variant.inStock ? 'Yes' : 'No',
+              //       pricePerServing: null,
+              //     });
+              //   }
+              // });
 
-              // Now, filter the best variants by price per kg or per serving
-              const bestVariants = productsWithPricePerKg
-                .map((variant) => {
-                  const price = parseFloat(
-                    variant.pricePerKg || variant.pricePerServing
-                  );
-                  return { ...variant, pricePerUnit: price };
-                })
-                .sort((a, b) => a.pricePerUnit - b.pricePerUnit); // Sort by the lowest price
+              // // Now, filter the best variants by price per kg or per serving
+              // const bestVariants = productsWithPricePerKg
+              //   .map((variant) => {
+              //     const price = parseFloat(
+              //       variant.pricePerKg || variant.pricePerServing
+              //     );
+              //     return { ...variant, pricePerUnit: price };
+              //   })
+              //   .sort((a, b) => a.pricePerUnit - b.pricePerUnit); // Sort by the lowest price
 
-              const bestPrice = bestVariants[0].pricePerUnit; // Best price per kg or per serving
-              const filteredBestVariants = bestVariants.filter(
-                (v) => v.pricePerUnit === bestPrice
-              );
+              // const bestPrice = bestVariants[0].pricePerUnit; // Best price per kg or per serving
+              // const filteredBestVariants = bestVariants.filter(
+              //   (v) => v.pricePerUnit === bestPrice
+              // );
 
               // Show the result
               let resultHTML = '<h2>Best Products with Lowest Price:</h2>';
-              filteredBestVariants.forEach((variant) => {
+              data.forEach((variant) => {
                 resultHTML += `
               <p><strong>${variant.title}</strong> (SKU: ${variant.sku})</p>
-              <p>Price: £${variant.total.toFixed(2)}</p>
+              <p>Price: £${variant.total}</p>
               <p>Price per unit: £${variant.pricePerUnit}</p>
               <p>Stock: ${variant.inStock}</p>
               <hr>
