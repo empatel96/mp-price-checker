@@ -11,7 +11,7 @@ const createHtml = (variants) => {
     resultHTML += `
         <p><strong>${variant.title}</strong> (SKU: ${variant.sku})</p>
         <p>Price: £${variant.total}</p>
-        <p>Price per unit: £${variant.pricePerUnit}</p>
+        <p>Price per ${variant.unit}: £${variant.pricePerUnit}</p>
         <p>Stock: ${variant.inStock}</p>
         <img src="${variant.images.original}" alt="${variant.title}" height="50" />
         <hr>

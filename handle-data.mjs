@@ -28,8 +28,23 @@ export const processVariants = (variants) => {
       if (weightMatch) {
         const amountKey = weightMatch.key.toLowerCase();
         const numericValue = parseFloat(amountKey.replace(/[^\d.]/g, ''));
+        console.log(amountKey);
 
-        if (amountKey.includes('servings') || amountKey.includes('tablets')) {
+        if (amountKey.includes('kg') || amountKey.includes('g')) {
+          // Extract only the weight part from the key
+          const weightMatch = amountKey.match(/(\d+\.?\d*)\s?(kg|g)/i);
+
+          if (weightMatch) {
+            const weightValue = parseFloat(weightMatch[1]); // Extract the numeric value
+            const weightUnit = weightMatch[2].toLowerCase(); // Extract the unit (kg or g)
+
+            // Convert grams to kilograms if needed
+            weight = weightUnit === 'kg' ? weightValue : weightValue / 1000;
+          }
+        } else if (
+          amountKey.includes('servings') ||
+          amountKey.includes('tablets')
+        ) {
           const servings = numericValue || 1;
           pricePerServing = priceAmount / servings;
           return {
@@ -38,13 +53,10 @@ export const processVariants = (variants) => {
             servings,
             sku: variant.sku,
             pricePerUnit: pricePerServing.toFixed(2),
+            unit: amountKey.includes('servings') ? 'serving' : 'tablet',
             inStock: inStock ? 'Yes' : 'No',
             images: getImage(variant),
           };
-        } else if (amountKey.includes('kg') || amountKey.includes('g')) {
-          weight = amountKey.includes('kg')
-            ? numericValue
-            : numericValue / 1000;
         }
       }
 
@@ -56,6 +68,7 @@ export const processVariants = (variants) => {
           weight,
           sku: variant.sku,
           pricePerUnit: pricePerKg.toFixed(2),
+          unit: 'kg',
           inStock: inStock ? 'Yes' : 'No',
           images: getImage(variant),
         };
