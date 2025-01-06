@@ -1,4 +1,9 @@
-import { processVariants, getBestVariants } from './handle-data.mjs';
+import {
+  processVariants,
+  getBestVariants,
+  extractSku,
+  identifyInput,
+} from './handle-data.mjs';
 
 const createHtml = (variants) => {
   let resultHTML = '<h2>Best Products with Lowest Price:</h2>';
@@ -18,13 +23,18 @@ const createHtml = (variants) => {
 document
   .getElementById('checkPriceButton')
   .addEventListener('click', function () {
-    const sku = document.getElementById('sku').value.trim();
+    const input = document.getElementById('sku').value.trim();
 
     // Check if SKU is entered
-    if (!sku) {
-      alert('Please enter a valid SKU.');
+    if (!input) {
+      alert('Please enter a valid SKU or URL.');
       return;
     }
+
+    const inputType = identifyInput(input);
+
+    let sku = inputType === 'url' ? extractSku(input) : input;
+
     document.getElementById('result').innerHTML = '<p>Loading...</p>';
 
     const cachedData = sessionStorage.getItem(sku);

@@ -66,6 +66,25 @@ export const processVariants = (variants) => {
     .filter(Boolean);
 };
 
+export const extractSku = (url) => {
+  const regex = /\/(\d+)(?:\/|\?|$)/; // Match digits followed by /, ?, or end of string
+  const match = url.match(regex);
+  return match ? match[1] : null; // Return the first captured group or null
+};
+
+export const identifyInput = (input) => {
+  const urlRegex = /^(https?:\/\/[^\s/$.?#].[^\s]*)$/; // Match valid URLs
+  const skuRegex = /^\d+$/; // Match only numeric input
+
+  if (urlRegex.test(input)) {
+    return 'url';
+  } else if (skuRegex.test(input)) {
+    return 'sku';
+  } else {
+    return 'invalid';
+  }
+};
+
 const getImage = (product) => {
   return (
     (product.images && product.images.length > 0
